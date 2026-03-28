@@ -52,7 +52,7 @@ export default function ScoreScreen({ game, setGame, mode }: Props) {
 
           {/* Final drawing */}
           <div className="rounded-2xl overflow-hidden border border-white/10 mb-6 bg-white">
-            <MiniCanvas strokes={game.finalStrokes} width={400} height={300} />
+            <MiniCanvas strokes={game.finalStrokes} />
           </div>
 
           {/* Score slider */}
@@ -156,7 +156,7 @@ export default function ScoreScreen({ game, setGame, mode }: Props) {
 
           {/* Drawing */}
           <div className="rounded-2xl overflow-hidden border border-white/10 mb-6 bg-white shadow-2xl">
-            <MiniCanvas strokes={game.finalStrokes} width={400} height={300} />
+            <MiniCanvas strokes={game.finalStrokes} />
           </div>
 
           {/* Score reveal */}

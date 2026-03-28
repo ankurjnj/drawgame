@@ -50,7 +50,7 @@ export default function GiverScreen({ game, setGame }: Props) {
           <h2 className="text-2xl font-bold text-center mb-4">Time to Score!</h2>
           <p className="text-gray-400 text-center mb-6">All hints used. Here's what {drawerName} drew:</p>
           <div className="rounded-2xl overflow-hidden border border-white/10 mb-6 bg-white">
-            <MiniCanvas strokes={game.finalStrokes} width={400} height={300} />
+            <MiniCanvas strokes={game.finalStrokes} />
           </div>
           <button
             onClick={goToScoring}
@@ -171,7 +171,7 @@ export default function GiverScreen({ game, setGame }: Props) {
 
           {/* Live canvas preview */}
           <div className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-white mb-4" style={{ minHeight: 200 }}>
-            <MiniCanvas strokes={[]} live={true} width={400} height={300} />
+            <MiniCanvas strokes={[]} live={true} />
           </div>
 
           <div className="flex gap-3">
