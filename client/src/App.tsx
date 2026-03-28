@@ -222,12 +222,15 @@ function App() {
     };
   }, []);
 
-  // Check URL for room code on load
+  // Check URL for room code on load — auto-show join screen
   useEffect(() => {
     const path = window.location.pathname;
     const match = path.match(/\/room\/([A-Z0-9]{6})/i);
     if (match) {
-      setGame(prev => ({ ...prev, phase: 'home', roomId: match[1].toUpperCase() }));
+      const code = match[1].toUpperCase();
+      setGame(prev => ({ ...prev, phase: 'home', roomId: code }));
+      // Clean up URL but keep code in state
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 
