@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "concurrently \"node server.js\" \"cd client && npm run dev\"",
     "build": "cd client && npm run build",
-    "install:all": "npm install && cd client && npm install"
+    "build:all": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",
