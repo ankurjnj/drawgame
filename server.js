@@ -109,32 +109,27 @@ function advanceHint(roomId) {
   const room = getRoom(roomId);
   if (!room) return;
 
-  room.currentHint++;
+  // Guard: don't advance if already ended
+  if (room.phase === 'viewing' || room.phase === 'scoring' || room.phase === 'reveal') return;
 
-  if (room.currentHint >= room.settings.hintRounds) {
-    // All hints used
-    stopTimer(room);
+  stopTimer(room);
+
+  // currentHint tracks how many hints have been SHOWN (0-indexed)
+  // After timer/next, move to next hint
+  const nextHintIndex = room.currentHint + 1;
+
+  if (nextHintIndex >= room.settings.hintRounds) {
+    // All hints done
     room.phase = 'viewing';
-    io.to(roomId).emit('all_rounds_end', {
-      strokes: room.strokes
-    });
+    io.to(roomId).emit('all_rounds_end', { strokes: room.strokes });
     io.to(roomId).emit('room_state', getRoomState(room, roomId));
   } else {
-    // Next hint round
+    // Move to next hint — giver needs to submit it
+    room.currentHint = nextHintIndex;
     room.phase = 'hint_round';
     io.to(roomId).emit('round_end', { currentHint: room.currentHint });
-
-    // Wait for giver to submit next hint or show existing
-    const existingHint = room.hints[room.currentHint];
-    if (existingHint) {
-      io.to(roomId).emit('hint_received', {
-        hint: existingHint,
-        hintIndex: room.currentHint,
-        totalHints: room.settings.hintRounds
-      });
-      startTimer(roomId, room.settings.hintTimer, () => advanceHint(roomId));
-    }
     io.to(roomId).emit('room_state', getRoomState(room, roomId));
+    // Giver will now submit next hint via submit_hint
   }
 }
 
@@ -282,12 +277,16 @@ io.on('connection', (socket) => {
     const room = getRoom(roomId);
     if (!room) return;
 
-    const hintIndex = room.hints.length;
-    room.hints.push(hint);
+    // Only giver can submit hints
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player || player.role !== 'giver') return;
+
+    const hintIndex = room.currentHint;
+    room.hints[hintIndex] = hint;
     room.phase = 'hint_round';
     room.lastActivity = Date.now();
 
-    // Send hint to drawer
+    // Send hint to both players
     io.to(roomId).emit('hint_received', {
       hint,
       hintIndex,
@@ -296,7 +295,7 @@ io.on('connection', (socket) => {
 
     io.to(roomId).emit('room_state', getRoomState(room, roomId));
 
-    // Start timer
+    // Start timer — when it ends, advance to next hint
     startTimer(roomId, room.settings.hintTimer, () => advanceHint(roomId));
   });
 

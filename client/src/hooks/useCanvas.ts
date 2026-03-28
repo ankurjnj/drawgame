@@ -18,6 +18,8 @@ interface UseCanvasOptions {
   color: string;
   brushSize: number;
   isEraser: boolean;
+  canvasWidth?: number;
+  canvasHeight?: number;
 }
 
 export function useCanvas(options: UseCanvasOptions) {
