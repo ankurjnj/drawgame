@@ -41,6 +41,7 @@ export default function DrawerScreen({ game }: Props) {
   });
 
   const giverName = game.roomState?.players.find(p => p.role === 'giver')?.name || 'Giver';
+  const canDraw = game.phase === 'hint_round';  // locked during waiting_hint, character_input, viewing
 
   // Responsive: fit canvas to available space, respecting zoom
   useEffect(() => {
@@ -76,8 +77,8 @@ export default function DrawerScreen({ game }: Props) {
           {game.phase === 'hint_round' && game.currentHint && (
             <p className="text-[#7B2FFF] font-bold text-base leading-tight truncate">{game.currentHint}</p>
           )}
-          {game.phase === 'character_input' && (
-            <p className="text-gray-400 text-sm italic">Waiting for hint...</p>
+          {(game.phase === 'character_input' || game.phase === 'waiting_hint') && (
+            <p className="text-yellow-400 text-sm font-semibold animate-pulse">⏳ Waiting for hint {game.hintIndex + 1}/{game.totalHints}...</p>
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -103,6 +104,16 @@ export default function DrawerScreen({ game }: Props) {
           className="relative shadow-2xl flex-shrink-0"
           style={{ width: displaySize.width, height: displaySize.height }}
         >
+          {!canDraw && game.phase !== 'viewing' && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg"
+              style={{ background: 'rgba(10,10,15,0.55)', backdropFilter: 'blur(2px)' }}>
+              <div className="text-center">
+                <div className="text-3xl mb-2">⏳</div>
+                <p className="text-white font-bold text-lg">Waiting for hint {game.hintIndex + 1}...</p>
+                <p className="text-gray-400 text-sm mt-1">Canvas locked until giver sends next hint</p>
+              </div>
+            </div>
+          )}
           <canvas
             ref={canvasRef}
             width={CANVAS_W}
@@ -111,9 +122,11 @@ export default function DrawerScreen({ game }: Props) {
             style={{
               width: displaySize.width,
               height: displaySize.height,
-              cursor: isEraser ? 'cell' : 'crosshair',
+              cursor: !canDraw ? 'not-allowed' : isEraser ? 'cell' : 'crosshair',
               touchAction: 'none',
               background: '#ffffff',
+              pointerEvents: canDraw ? 'auto' : 'none',
+              opacity: canDraw ? 1 : 0.7,
             }}
           />
         </div>

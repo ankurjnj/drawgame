@@ -107,6 +107,31 @@ export default function GiverScreen({ game, setGame }: Props) {
         </div>
       )}
 
+      {/* Waiting for next hint — between rounds */}
+      {game.phase === 'waiting_hint' && (
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+          <div className="text-center mb-6">
+            <p className="text-yellow-400 font-bold text-lg">Timer ended! ⏱️</p>
+            <p className="text-gray-400 mt-1">Enter hint {game.hintIndex + 1} of {game.totalHints}</p>
+          </div>
+          <label className="text-gray-400 text-sm mb-2 uppercase tracking-widest font-semibold">Hint {game.hintIndex + 1}</label>
+          <input
+            type="text"
+            value={hint}
+            onChange={e => setHint(e.target.value)}
+            placeholder="Enter next hint..."
+            maxLength={100}
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-lg focus:outline-none focus:border-[#7B2FFF] transition-colors mb-4"
+            onKeyDown={e => e.key === 'Enter' && submitHint()}
+            autoFocus
+          />
+          <button onClick={submitHint} disabled={!hint.trim()}
+            className="w-full py-4 text-lg font-bold rounded-2xl bg-[#7B2FFF] hover:bg-[#9B5FFF] disabled:opacity-40 transition-all active:scale-95">
+            Send Hint &amp; Start Timer
+          </button>
+        </div>
+      )}
+
       {/* After character submitted - waiting or hint entry */}
       {game.phase === 'character_input' && characterSubmitted && (
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">

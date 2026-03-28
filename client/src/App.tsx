@@ -6,7 +6,7 @@ import GiverScreen from './components/GiverScreen';
 import DrawerScreen from './components/DrawerScreen';
 import ScoreScreen from './components/ScoreScreen';
 
-export type GamePhase = 'home' | 'lobby' | 'character_input' | 'hint_round' | 'viewing' | 'scoring' | 'reveal';
+export type GamePhase = 'home' | 'lobby' | 'character_input' | 'hint_round' | 'waiting_hint' | 'viewing' | 'scoring' | 'reveal';
 
 export interface Player {
   id: string;
@@ -154,6 +154,15 @@ function App() {
       setGame(prev => ({ ...prev, hintIndex: currentHint }));
     });
 
+    socket.on('waiting_for_hint', ({ hintIndex, totalHints }) => {
+      setGame(prev => ({
+        ...prev,
+        phase: 'waiting_hint',
+        hintIndex,
+        totalHints,
+      }));
+    });
+
     socket.on('all_rounds_end', ({ strokes }) => {
       setGame(prev => ({
         ...prev,
@@ -212,6 +221,7 @@ function App() {
       socket.off('game_start');
       socket.off('character_accepted');
       socket.off('hint_received');
+      socket.off('waiting_for_hint');
       socket.off('timer_tick');
       socket.off('round_end');
       socket.off('all_rounds_end');
@@ -242,6 +252,7 @@ function App() {
         return <Lobby game={game} setGame={setGame} />;
       case 'character_input':
       case 'hint_round':
+      case 'waiting_hint':
       case 'viewing':
         if (game.role === 'giver') {
           return <GiverScreen game={game} setGame={setGame} />;
